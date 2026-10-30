@@ -3,7 +3,7 @@ import telebot
 from yt_dlp import YoutubeDL
 
 # ضع رمز التوكن الخاص بك هنا بين العلامتين
-API_TOKEN = os.getenv("BOT_TOKEN")
+API_TOKEN = "9012577606:AAGr1v1QeDpcHuJRmebM_aGFcsNH6e9pRFY"
 bot = telebot.TeleBot(API_TOKEN)
 
 @bot.message_handler(commands=['start', 'help'])
