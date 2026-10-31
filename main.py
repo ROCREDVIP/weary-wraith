@@ -1,90 +1,50 @@
 import os
-from flask import Flask
-from threading import Thread
 import telebot
-from yt_dlp import YoutubeDL
+from flask import Flask, request
 
-app = Flask('')
+# ضع التوكن الخاص ببوتك هنا أو استخدم متغيرات البيئة (Environment Variables)
+TOKEN = os.environ.get('9012577606:AAGr1v1QeDpcHuJRmebM_aGFcsNH6e9pRFY
+')
+bot = telebot.TeleBot(TOKEN)
 
+app = Flask(__name__)
+
+# رابط موقعك على Render الذي يظهر في السجلات
+# مثال: https://weary-wraith.onrender.com
+RENDER_URL = "https://weary-wraith.onrender.com"
+WEBHOOK_URL = f"{RENDER_URL}/{TOKEN}"
+
+# إستقبال الرسائل من تيليجرام
+@app.route(f'/{TOKEN}', methods=['POST'])
+def webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return "!", 200
+    else:
+        return "Invalid data", 403
+
+# الصفحة الرئيسية للتأكد أن السيرفر يعمل
 @app.route('/')
-def home():
-    return "Bot is alive and running!"
+def index():
+    return "Bot is running smoothly!", 200
 
-def run():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
-
-# توكن البوت الخاص بك
-API_TOKEN = "9012577606:AAGr1v1QedPchUjRmebM_aGFcsNH6e9pRFY"
-bot = telebot.TeleBot(API_TOKEN)
-
-@bot.message_handler(commands=['start', 'help'])
+# الرد على رسالة /start
+@bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.reply_to(message, "أهلاً بك في بوت الموسيقى المحسن! 🎵\nأرسل اسم الأغنية أو الرابط للتحميل مباشرة.")
+    bot.reply_to(message, "مرحباً بك! البوت يعمل الآن بنجاح على منصة Render 🚀")
 
+# الرد على أي نص عادي
 @bot.message_handler(func=lambda message: True)
-def download_and_send_audio(message):
-    query = message.text
-    chat_id = message.chat.id
+def echo_all(message):
+    bot.reply_to(message, f"أهلاً بك، لقد استلمت رسالتك: {message.text}")
+
+if __name__ == "__main__":
+    # إزالة أي Webhook قديم وتعيين الرابط الجديد
+    bot.remove_webhook()
+    bot.set_webhook(url=WEBHOOK_URL)
     
-    status_msg = bot.send_message(chat_id, "🔍 جاري البحث والتحميل بأعلى دقة، انتظر لحظة 🎧...")
-    
-    audio_file = None
-    try:
-        # إعدادات قوية ومتطورة لتجاوز حظر يوتيوب ودعم السيرفرات
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-            'default_search': 'ytsearch',
-            'outtmpl': '%(id)s.%(ext)s',
-            'quiet': True,
-            'no_warnings': True,
-            'ignoreerrors': False,
-            # تعديلات قوية لمحاكاة المتصفح وتجاوز قيود البوتات
-            'extractor_args': {
-                'youtube': {
-                    'player_client': ['web', 'ios', 'android'],
-                    'skip': ['hls', 'dash']
-                }
-            },
-            'geo_bypass': True,
-            'nocheckcertificate': True,
-        }
-
-        with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(query, download=True)
-            if 'entries' in info:
-                info = info['entries'][0]
-
-            filename = ydl.prepare_filename(info)
-            audio_file = filename.rsplit(".", 1)[0] + ".mp3"
-
-        # التأكد من وجود الملف وجاهزيته للإرسال
-        if audio_file and os.path.exists(audio_file):
-            with open(audio_file, 'rb') as audio:
-                bot.send_audio(chat_id, audio)
-            bot.delete_message(chat_id, status_msg.message_id)
-        else:
-            raise Exception("فشل في معالجة وتحويل الملف الصوتي.")
-
-    except Exception as e:
-        bot.edit_message_text(f"❌ حدث خطأ أثناء التحميل:\n{str(e)}", chat_id, status_msg.message_id)
-
-    finally:
-        # تنظيف الملفات المؤقتة من السيرفر تماماً بعد الإرسال
-        if audio_file and os.path.exists(audio_file):
-            try:
-                os.remove(audio_file)
-            except:
-                pass
-
-if __name__ == '__main__':
-    keep_alive()
-    bot.infinity_polling()
+    # تشغيل تطبيق Flask بالمنفذ المطلوب من المنصة
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host="0.0.0.0", port=port)
