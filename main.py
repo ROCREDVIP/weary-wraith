@@ -1,6 +1,19 @@
 import os
-import telebot
-from yt_dlp import YoutubeDL
+from flask import Flask
+from threading import Thread
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
 
 # ضع توكن البوت الخاص بك هنا بين علامتي التنصيص
 API_TOKEN = "9012577606:AAGr1v1QeDpcHuJRmebM_aGFcsNH6e9pRFY"
@@ -52,4 +65,7 @@ def download_and_send_audio(message):
         bot.edit_message_text(f"❌ حدث خطأ أثناء التحميل: {str(e)}", chat_id, status_msg.message_id)
 
 if __name__ == '__main__':
+    keep_alive()
     bot.infinity_polling()
+
+
