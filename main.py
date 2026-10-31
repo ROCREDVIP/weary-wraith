@@ -76,6 +76,8 @@ def download_and_send_audio(message):
             except:
                 pass
 
-if __name__ == '__main__':
+
+    if __name__ == '__main__':
     keep_alive()
-    bot.infinity_polling()
+    bot.infinity_polling(timeout=10, long_polling_timeout=5)
+
