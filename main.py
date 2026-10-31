@@ -2,12 +2,13 @@ import os
 from flask import Flask
 from threading import Thread
 import telebot
+from yt_dlp import YoutubeDL
 
 app = Flask('')
 
 @app.route('/')
 def home():
-    return "Bot is alive and responding!"
+    return "Bot is alive!"
 
 def run():
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
@@ -16,19 +17,55 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
-# توكن البوت الخاص بك
+# ضع توكن البوت الخاص بك هنا بين علامتي التنصيص
 API_TOKEN = "9012577606:AAGr1v1QedPchUjRmebM_aGFcsNH6e9pRFY"
 bot = telebot.TeleBot(API_TOKEN)
 
-# أمر البداية للتأكد من تفاعل البوت معك فوراً
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    bot.reply_to(message, "أهلاً بك! البوت يعمل الآن ويتفاعل معك بنجاح 🚀\nأرسل لي أي كلمة للتجربة.")
+    bot.reply_to(message, "أهلاً بك في بوت الموسيقى! أرسل لي اسم الأغنية أو الرابط 🎵، وسأقوم بتحميلها لك مجاناً.")
 
-# استقبال أي رسالة نصية والرد عليها فوراً لتأكيد الاستجابة
 @bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    bot.reply_to(message, f"لقد استقبلت رسالتك: {message.text} ✅")
+def download_and_send_audio(message):
+    query = message.text
+    chat_id = message.chat.id
+    
+    status_msg = bot.send_message(chat_id, "🔍 جاري البحث والتحميل، انتظر لحظة 🎧...")
+    
+    try:
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'default_search': 'ytsearch',
+            'outtmpl': '%(id)s.%(ext)s',
+            'quiet': True,
+            'no_warnings': True,
+            'ignoreerrors': False,
+        }
+
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=True)
+            if 'entries' in info:
+                info = info['entries'][0]
+
+            filename = ydl.prepare_filename(info)
+            audio_file = filename.rsplit(".", 1)[0] + ".mp3"
+
+        with open(audio_file, 'rb') as audio:
+            bot.send_audio(chat_id, audio)
+
+        bot.delete_message(chat_id, status_msg.message_id)
+
+        # حذف الملف من السيرفر بعد الإرسال لتوفير المساحة
+        if os.path.exists(audio_file):
+            os.remove(audio_file)
+
+    except Exception as e:
+        bot.edit_message_text(f"❌ حدث خطأ أثناء التحميل:\n{e}", chat_id, status_msg.message_id)
 
 if __name__ == '__main__':
     keep_alive()
