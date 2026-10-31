@@ -34,20 +34,19 @@ def download_and_send_audio(message):
 
     try:
         # إعدادات تحميل الصوت وتحويله إلى MP3
-            ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'default_search': 'ytsearch',
-        'outtmpl': '%(id)s.%(ext)s',
-        'quiet': True,
-        'no_warnings': True,
-        'ignoreerrors': False,
-        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
-    }
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'default_search': 'ytsearch',
+            'outtmpl': '%(id)s.%(ext)s',
+            'quiet': True,
+            'no_warnings': True,
+            'ignoreerrors': False,
+        }
 
 
         with YoutubeDL(ydl_opts) as ydl:
