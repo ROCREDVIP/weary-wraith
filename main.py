@@ -46,7 +46,9 @@ def download_and_send_audio(message):
             'quiet': True,
             'no_warnings': True,
             'ignoreerrors': False,
+            'extractor_args': {'youtube': {'player_client': ['web', 'android']}},
         }
+
 
 
         with YoutubeDL(ydl_opts) as ydl:
