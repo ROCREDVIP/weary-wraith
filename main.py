@@ -18,7 +18,7 @@ def keep_alive():
     t.start()
 
 # ضع توكن البوت الخاص بك هنا بين علامتي التنصيص
-API_TOKEN = "9012577606:AAGr1v1QedPchUjRmebM_aGFcsNH6e9pRFY"
+API_TOKEN = "9012577606:AAGr1v1QeDpcHuJRmebM_aGFcsNH6e9pRFY"
 bot = telebot.TeleBot(API_TOKEN)
 
 @bot.message_handler(commands=['start', 'help'])
