@@ -1,3 +1,4 @@
+telebot
 Flask
-pyTelegramBotAPI
-yt_dlp>=2024.3.10
+yt_dlp>=2024.0.0
+ffmpeg-python
