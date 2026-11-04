@@ -1,4 +1,4 @@
-telebot
+
 Flask
 yt_dlp>=2024.0.0
 ffmpeg-python
