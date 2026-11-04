@@ -40,11 +40,22 @@ def download_and_send_audio(message):
     'nocheckcertificate': True,
     'ignoreerrors': False,
     'logtostderr': False,
+    # التعديل هنا لتجاوز حظر البوتات من يوتيوب
     'extractor_args': {
         'youtube': {
-            'player_client': ['android', 'web'], 
+            'player_client': ['mweb', 'ios'],
         }
     },
+    'http_headers': {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    },
+    'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '192',
+    }],
+}
+
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
         'preferredcodec': 'mp3',
