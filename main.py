@@ -59,39 +59,4 @@ def send_welcome(message):
 @bot.message_handler(func=lambda message: True)
 def download_audio(message):
     query = message.text
-    sent_msg = bot.reply_to(message, "⏳ جاري البحث والتحميل، يرجى الانتظار...")
-    
-    try:
-        # البحث والتحميل باستخدام yt_dlp
-        search_query = f"ytsearch:{query}" if not query.startswith("http") else query
-        
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(search_query, download=True)
-            if 'entries' in info:
-                info = info['entries'][0]
-            
-            filename = ydl.prepare_filename(info)
-            base, ext = os.path.splitext(filename)
-            mp3_file = base + ".mp3"
-            
-        # إرسال الملف الصوتي للمستخدم
-        with open(mp3_file, 'rb') as audio:
-            bot.send_audio(message.chat.id, audio, title=info.get('title', 'Audio'))
-            
-        bot.delete_message(message.chat.id, sent_msg.message_id)
-        
-        # تنظيف الملفات المؤقتة من السيرفر
-        if os.path.exists(mp3_file):
-            os.remove(mp3_file)
-            
-    except Exception as e:
-        bot.edit_message_text(f"❌ حدث خطأ أثناء التحميل:\n`{str(e)}`", message.chat.id, sent_msg.message_id, parse_mode="Markdown")
-
-if __name__ == "__main__":
-    # إزالة أي ربط قديم وتعيين الويب هوك الجديد
-    bot.remove_webhook()
-    bot.set_webhook(url=WEBHOOK_URL)
-    
-    # تشغيل السيرفر بالمنفذ الخاص بمنصة Render
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host="0.0.0.0", port=port)
+    sent_msg = bot.reply_to(message, "⏳ جاري البحث والتحميل، يرجى الانتظار
